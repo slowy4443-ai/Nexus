@@ -16,18 +16,58 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Gradle 8.5
-      uses: gradle/actions/setup-gradle@v3
-      with:
-        gradle-version: '8.5'
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
-    - name: Build APK
-      run: gradle assembleDebug
+    - name: Setup Directory Structure & Build APK
+      run: |
+        mkdir -p app/src/main/res/values
+        [ -f AndroidManifest.xml ] && mv AndroidManifest.xml app/src/main/
+        [ -f strings.xml ] && mv strings.xml app/src/main/res/values/
+        [ -f colors.xml ] && mv colors.xml app/src/main/res/values/
+        [ -f themes.xml ] && mv themes.xml app/src/main/res/values/
+        [ -f ic_launcher.xml ] && mv ic_launcher.xml app/src/main/res/values/
+        [ -f ic_launcher_foreground.xml ] && mv ic_launcher_foreground.xml app/src/main/res/values/
+
+        cat << 'EOF' > settings.gradle
+        rootProject.name = "Nexus"
+        include ':app'
+        EOF
+
+        cat << 'EOF' > build.gradle
+        buildscript {
+            repositories { google(); mavenCentral() }
+            dependencies { classpath 'com.android.tools.build:gradle:8.1.0' }
+        }
+        allprojects {
+            repositories { google(); mavenCentral() }
+        }
+        EOF
+
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+        }
+        android {
+            namespace 'com.example.nexus'
+            compileSdk 34
+            defaultConfig {
+                applicationId "com.example.nexus"
+                minSdk 24
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+        }
+        EOF
+
+        gradle assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: '**/build/outputs/apk/debug/*.apk'
+        path: app/build/outputs/apk/debug/*.apk
+        
         
         
