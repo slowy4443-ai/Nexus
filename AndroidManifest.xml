@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        PACKAGE_USAGE_STATS cannot be granted via a normal runtime prompt.
+        The user must explicitly enable it in Settings > Usage Access.
+        We never assume it is granted; we always verify with AppOpsManager.
+    -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!--
+        We deliberately do NOT request QUERY_ALL_PACKAGES.
+        UsageStatsManager returns usage events by package name even without
+        package visibility, but to show a human-readable app name/icon for
+        a package we've detected usage for, we resolve it individually via
+        PackageManager, which is allowed under the visibility rules for
+        packages the system has already told us about (usage stats results
+        are treated as an implicit-visibility exception on modern Android;
+        where a name/icon cannot be resolved, we fall back to showing the
+        raw package name instead of guessing).
+    -->
+
+    <application
+        android:name=".NexusApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.NexusGamer">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.NexusGamer">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
