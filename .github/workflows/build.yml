@@ -16,14 +16,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Gradle 8.5
-      uses: gradle/actions/setup-gradle@v3
-      with:
-        gradle-version: '8.5'
-
     - name: Setup Directory Structure & Build APK
       run: |
+        mkdir -p app/src/main/java/com/example/nexus
         mkdir -p app/src/main/res/values
+
+        # Move existing xml files if present
         [ -f AndroidManifest.xml ] && mv AndroidManifest.xml app/src/main/ || true
         [ -f strings.xml ] && mv strings.xml app/src/main/res/values/ || true
         [ -f colors.xml ] && mv colors.xml app/src/main/res/values/ || true
@@ -31,6 +29,44 @@ jobs:
         [ -f ic_launcher.xml ] && mv ic_launcher.xml app/src/main/res/values/ || true
         [ -f ic_launcher_foreground.xml ] && mv ic_launcher_foreground.xml app/src/main/res/values/ || true
 
+        # Create basic MainActivity if missing
+        cat << 'EOF' > app/src/main/java/com/example/nexus/MainActivity.java
+        package com.example.nexus;
+        import android.app.Activity;
+        import android.os.Bundle;
+
+        public class MainActivity extends Activity {
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+            }
+        }
+        EOF
+
+        # Create Manifest if missing
+        if [ ! -f app/src/main/AndroidManifest.xml ]; then
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <application
+                android:allowBackup="true"
+                android:label="Nexus"
+                android:supportsRtl="true"
+                android:theme="@android:style/Theme.Material.Light">
+                <activity
+                    android:name=".MainActivity"
+                    android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+        fi
+
+        # Create Gradle configurations
         cat << 'EOF' > settings.gradle
         rootProject.name = "Nexus"
         include ':app'
@@ -63,13 +99,15 @@ jobs:
         }
         EOF
 
-        gradle assembleDebug
+        gradle wrapper --gradle-version 8.5
+        ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
         path: app/build/outputs/apk/debug/*.apk
+        
         
         
         
