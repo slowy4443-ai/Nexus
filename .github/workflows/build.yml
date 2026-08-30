@@ -16,18 +16,20 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+    - name: Setup Gradle 8.5
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.5'
 
     - name: Setup Directory Structure & Build APK
       run: |
         mkdir -p app/src/main/res/values
-        [ -f AndroidManifest.xml ] && mv AndroidManifest.xml app/src/main/
-        [ -f strings.xml ] && mv strings.xml app/src/main/res/values/
-        [ -f colors.xml ] && mv colors.xml app/src/main/res/values/
-        [ -f themes.xml ] && mv themes.xml app/src/main/res/values/
-        [ -f ic_launcher.xml ] && mv ic_launcher.xml app/src/main/res/values/
-        [ -f ic_launcher_foreground.xml ] && mv ic_launcher_foreground.xml app/src/main/res/values/
+        [ -f AndroidManifest.xml ] && mv AndroidManifest.xml app/src/main/ || true
+        [ -f strings.xml ] && mv strings.xml app/src/main/res/values/ || true
+        [ -f colors.xml ] && mv colors.xml app/src/main/res/values/ || true
+        [ -f themes.xml ] && mv themes.xml app/src/main/res/values/ || true
+        [ -f ic_launcher.xml ] && mv ic_launcher.xml app/src/main/res/values/ || true
+        [ -f ic_launcher_foreground.xml ] && mv ic_launcher_foreground.xml app/src/main/res/values/ || true
 
         cat << 'EOF' > settings.gradle
         rootProject.name = "Nexus"
@@ -68,6 +70,7 @@ jobs:
       with:
         name: app-debug
         path: app/build/outputs/apk/debug/*.apk
+        
         
         
         
